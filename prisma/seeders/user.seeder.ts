@@ -19,7 +19,7 @@ export async function userSeeder() {
     {} as Record<string, Role>,
   );
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 100; i++) {
     // Push user data to users array
     users.push({
       email: `johndoe${i + 1}@email.com`,
@@ -29,21 +29,10 @@ export async function userSeeder() {
       roleId: null,
     });
 
-    if (i < 200) {
-      // 0 - 199
+    if (i <= 50) {
       users[i].roleId = rolesByName[ROLE_DUMMY.ADMIN]?.id ?? null;
-    } else if (i >= 200 && i < 400) {
-      // 200 - 399
-      users[i].roleId = rolesByName[ROLE_DUMMY.STAFF]?.id ?? null;
-    } else if (i >= 400 && i < 600) {
-      // 400 - 599
-      users[i].roleId = rolesByName[ROLE_DUMMY.ADMIN_SNACK]?.id ?? null;
-    } else if (i >= 600 && i < 800) {
-      // 600 - 799
-      users[i].roleId = rolesByName[ROLE_DUMMY.ADMIN_USER]?.id ?? null;
     } else {
-      // 800 - 999
-      users[i].roleId = rolesByName[ROLE_DUMMY.ADMIN_ROLE]?.id ?? null;
+      users[i].roleId = rolesByName[ROLE_DUMMY.USER]?.id ?? null;
     }
   }
 

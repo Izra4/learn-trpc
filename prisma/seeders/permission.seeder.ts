@@ -9,21 +9,6 @@ export async function permissionSeeder() {
       name: PERMISSIONS.DASHBOARD,
     },
     {
-      name: PERMISSIONS.SNACK_CREATE,
-    },
-    {
-      name: PERMISSIONS.SNACK_READ,
-    },
-    {
-      name: PERMISSIONS.SNACK_UPDATE,
-    },
-    {
-      name: PERMISSIONS.SNACK_DELETE,
-    },
-    {
-      name: PERMISSIONS.SNACK_DETAIL,
-    },
-    {
       name: PERMISSIONS.USER_CREATE,
     },
     {
@@ -52,6 +37,66 @@ export async function permissionSeeder() {
     },
     {
       name: PERMISSIONS.ROLE_READ,
+    },
+    {
+      name: PERMISSIONS.FILM_CREATE,
+    },
+    {
+      name: PERMISSIONS.FILM_UPDATE,
+    },
+    {
+      name: PERMISSIONS.FILM_DELETE,
+    },
+    {
+      name: PERMISSIONS.FILM_DETAIL,
+    },
+    {
+      name: PERMISSIONS.FILM_READ,
+    },
+    {
+      name: PERMISSIONS.GENRE_CREATE,
+    },
+    {
+      name: PERMISSIONS.GENRE_UPDATE,
+    },
+    {
+      name: PERMISSIONS.GENRE_DELETE,
+    },
+    {
+      name: PERMISSIONS.GENRE_DETAIL,
+    },
+    {
+      name: PERMISSIONS.GENRE_READ,
+    },
+    {
+      name: PERMISSIONS.FACILITY_CREATE,
+    },
+    {
+      name: PERMISSIONS.FACILITY_UPDATE,
+    },
+    {
+      name: PERMISSIONS.FACILITY_DELETE,
+    },
+    {
+      name: PERMISSIONS.FACILITY_DETAIL,
+    },
+    {
+      name: PERMISSIONS.FACILITY_READ,
+    },
+    {
+      name: PERMISSIONS.STUDIO_CREATE,
+    },
+    {
+      name: PERMISSIONS.STUDIO_UPDATE,
+    },
+    {
+      name: PERMISSIONS.STUDIO_DELETE,
+    },
+    {
+      name: PERMISSIONS.STUDIO_DETAIL,
+    },
+    {
+      name: PERMISSIONS.STUDIO_READ,
     },
   ];
 
