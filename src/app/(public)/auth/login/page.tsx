@@ -38,7 +38,12 @@ const LoginPage: React.FC = () => {
       </Form.Item>
 
       <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-        <Button type={"primary"} loading={loginByCredentialMutation.isPending} htmlType="submit">
+        <Button
+          type={"primary"}
+          loading={loginByCredentialMutation.isLoading}
+          htmlType="submit"
+          disabled={loginByCredentialMutation.isLoading}
+        >
           Login
         </Button>
       </Form.Item>
