@@ -6,10 +6,11 @@
 
 generator client {
   provider = "prisma-client-js"
+  dotenv   = "../.env.local"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DB_URL")
 }
 
@@ -71,13 +72,98 @@ model RolePermission {
   @@map("role_permissions")
 }
 
-model Snack {
+model Studio {
   id        String   @id @db.VarChar(255) @default(uuid(7))
-  name      String   @db.VarChar(255) @unique
-  price     Float
-  expiredAt DateTime @map("expired_at")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+  name      String   @db.VarChar(255) @unique
+  capacity  Int      @db.Int
+  deletedAt DateTime? @map("deleted_at")
 
-  @@map("snacks")
+  facilities FacilityStudio[]
+  schedules FilmSchedule[]
+
+  @@map("studios")
+}
+
+model Facility {
+  id        String   @id @db.VarChar(255) @default(uuid(7))
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  name      String @db.VarChar(255)
+  deletedAt DateTime? @map("deleted_at")
+
+  studios FacilityStudio[]
+
+  @@map("facilities")
+}
+
+model FacilityStudio{
+  studioId    String @db.VarChar(255) @map("studio_id")
+  facilityId  String @db.VarChar(255) @map("facility_id")
+
+  studio      Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+  facility    Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@id([studioId, facilityId])
+
+  @@map("facility_studio")
+}
+
+model Film{
+  id          String   @id @db.VarChar(255) @default(uuid(7))
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  title       String @db.VarChar(255)
+  duration    Int @db.SmallInt
+  description String @db.Text
+  poster      String  @db.MediumText
+  deletedAt   DateTime? @map("deleted_at")
+
+  genres FilmGenre[]
+  schedules FilmSchedule[]
+
+  @@map("films")
+}
+
+model Genre{
+  id          String   @id @db.VarChar(255) @default(uuid(7))
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  name        String @db.VarChar(255)
+  deletedAt   DateTime? @map("deleted_at")
+
+  films FilmGenre[]
+
+  @@map("genres")
+}
+
+model FilmGenre{
+  filmId      String @db.VarChar(255) @map("film_id")
+  genreId     String @db.VarChar(255) @map("genre_id")
+
+  film        Film @relation(fields: [filmId], references: [id], onDelete: Cascade)
+  genre       Genre @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([filmId, genreId])
+
+  @@map("film_genres")
+}
+
+model FilmSchedule{
+  id          String   @id @db.VarChar(255) @default(uuid(7))
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  filmId      String @db.VarChar(255) @map("film_id")
+  studioId    String @db.VarChar(255) @map("studio_id")
+  showTime    DateTime @db.DateTime @map("show_time")
+  price       Int @db.Int
+  deletedAt   DateTime? @map("deleted_at")
+
+  film        Film @relation(fields: [filmId], references: [id], onDelete: Cascade)
+  studio      Studio @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@unique([filmId, studioId,showTime])
+
+  @@map("film_schedules")
 }
