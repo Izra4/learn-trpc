@@ -10,16 +10,7 @@ export async function roleSeeder() {
       name: ROLE_DUMMY.ADMIN,
     },
     {
-      name: ROLE_DUMMY.STAFF,
-    },
-    {
-      name: ROLE_DUMMY.ADMIN_SNACK,
-    },
-    {
-      name: ROLE_DUMMY.ADMIN_USER,
-    },
-    {
-      name: ROLE_DUMMY.ADMIN_ROLE,
+      name: ROLE_DUMMY.USER,
     },
   ];
 
