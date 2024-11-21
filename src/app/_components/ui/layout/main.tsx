@@ -5,7 +5,13 @@ import { useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { MainLayout as Layout } from "admiral";
 import { TBreadcrumbsItem } from "admiral/breadcrumb";
-import { DashboardOutlined, PieChartFilled, TagOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  DashboardOutlined,
+  HolderOutlined,
+  PieChartFilled,
+  TagOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { Session } from "next-auth";
 import { hasCommonElements } from "@/utils/type";
@@ -41,10 +47,10 @@ const NavbarMenu = [
     permissions: [PERMISSIONS.ROLE_READ],
   },
   {
-    key: "/snacks",
-    label: <Link href="/snacks">Snacks</Link>,
-    icon: <TagOutlined />,
-    permissions: [PERMISSIONS.SNACK_READ],
+    key: "/genres",
+    label: <Link href="/genres">Genres</Link>,
+    icon: <HolderOutlined />,
+    permissions: [PERMISSIONS.GENRE_READ],
   },
 ];
 

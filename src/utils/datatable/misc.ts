@@ -7,7 +7,7 @@ export const paginationTransform = (t?: TPaginationMeta): TablePaginationConfig 
   return {
     current: t?.page,
     pageSize: t?.perPage,
-    total: t?.totalPage,
+    total: t?.total,
   };
 };
 
