@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { Page, Section } from "admiral";
-import { Descriptions, Spin } from "antd";
+import { Descriptions } from "antd";
 import { useParams } from "next/navigation";
 import { MOCK_GENRES } from "../_dummies/genre-mock-data";
-import { Genre } from "../../../../data/types/genre";
+import { Genre } from "@prisma/client";
 
 const DetailGenrePage = () => {
   const params = useParams();
