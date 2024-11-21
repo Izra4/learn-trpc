@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { MainLayout as Layout } from "admiral";
 import { TBreadcrumbsItem } from "admiral/breadcrumb";
 import {
+  BuildOutlined,
   DashboardOutlined,
   HolderOutlined,
   PieChartFilled,
@@ -51,6 +52,12 @@ const NavbarMenu = [
     label: <Link href="/genres">Genres</Link>,
     icon: <HolderOutlined />,
     permissions: [PERMISSIONS.GENRE_READ],
+  },
+  {
+    key: "/facilities",
+    label: <Link href="/facilities">Facilities</Link>,
+    icon: <BuildOutlined />,
+    permissions: [PERMISSIONS.FACILITY_READ],
   },
 ];
 
