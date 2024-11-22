@@ -5,48 +5,11 @@ import { ROUTE } from "../constant/route";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { hasCommonElements } from "@/utils/type";
 
-export const middlewarePermission = (url: NextURL, session: JWT | null) => {
-  const deniedUrl = new URL("/denied", url.origin);
-  if (session) {
-    const userRole = session?.user?.role;
-
-    const matchingRoute = permissionMapper.find((route) => {
-      const routeRegex = new RegExp(`^${route.url.replace(/\/$/, "")}$`);
-      const isMatch = routeRegex.test(url.pathname);
-      return isMatch;
-    });
-
-    if (matchingRoute) {
-      const isAuthorized = hasCommonElements(matchingRoute.permissions, userRole?.permissions);
-      if (!isAuthorized) {
-        return NextResponse.redirect(deniedUrl);
-      }
-    }
-  }
-
-  return NextResponse.next();
-};
-
-// TODO: Find better places
 const permissionMapper = [
   {
     url: ROUTE.DASHBOARD,
     permissions: [PERMISSIONS.DASHBOARD],
   },
-
-  {
-    url: ROUTE.SNACKS,
-    permissions: [PERMISSIONS.SNACK_READ],
-  },
-  {
-    url: ROUTE.SNACKS_FORM,
-    permissions: [PERMISSIONS.SNACK_CREATE, PERMISSIONS.SNACK_UPDATE],
-  },
-  {
-    url: ROUTE.SNACKS_DETAIL,
-    permissions: [PERMISSIONS.SNACK_DETAIL],
-  },
-
   {
     url: ROUTE.USERS,
     permissions: [PERMISSIONS.USER_READ],
@@ -73,3 +36,25 @@ const permissionMapper = [
     permissions: [PERMISSIONS.ROLE_DETAIL],
   },
 ];
+
+export const middlewarePermission = (url: NextURL, session: JWT | null) => {
+  const deniedUrl = new URL("/denied", url.origin);
+  if (session) {
+    const userRole = session?.user?.role;
+
+    const matchingRoute = permissionMapper.find((route) => {
+      const routeRegex = new RegExp(`^${route.url.replace(/\/$/, "")}$`);
+      const isMatch = routeRegex.test(url.pathname);
+      return isMatch;
+    });
+
+    if (matchingRoute) {
+      const isAuthorized = hasCommonElements(matchingRoute.permissions, userRole?.permissions);
+      if (!isAuthorized) {
+        return NextResponse.redirect(deniedUrl);
+      }
+    }
+  }
+
+  return NextResponse.next();
+};

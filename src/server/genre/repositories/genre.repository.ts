@@ -12,6 +12,14 @@ export const findAllGenre = async (): Promise<Genre[]> => {
   return await prisma.genre.findMany();
 };
 
+export const findGenreById = async (id: string): Promise<Genre | null> => {
+  return await prisma.genre.findUnique({
+    where: {
+      id,
+    },
+  });
+};
+
 export const updateGenreById = async (id: string, data: Genre): Promise<void> => {
   await prisma.genre.update({
     where: {
