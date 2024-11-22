@@ -29,10 +29,9 @@ export const getGenresAction = async () => {
   return await findAllGenre();
 };
 
-export const getGenreAction = async (from?: string) => {
+export const getGenreAction = async (from: string) => {
   await serverCheckPermission([PERMISSIONS.GENRE_DETAIL]);
 
-  if (!from) return undefined;
   const genre = await findGenreById(from);
 
   if (!genre) {
