@@ -17,7 +17,7 @@ datasource db {
 model User {
   id        String   @id @db.VarChar(255) @default(uuid(7))
   email     String   @db.VarChar(255) @unique
-  fullname      String? @db.VarChar(255)
+  fullname      String @db.VarChar(255)
   address      String? @db.Text
   password  String @db.VarChar(255)
   otp String? @db.VarChar(255)

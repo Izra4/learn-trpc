@@ -20,7 +20,6 @@ export const userPagination = async (
           ? {
               fullname: {
                 contains: queryParam.search,
-                mode: "insensitive",
               },
             }
           : {}),
