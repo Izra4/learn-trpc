@@ -29,7 +29,7 @@ export const getFacilitiesAction = async () => {
   return await findAllFacility();
 };
 
-export const getFacilityAction = async (id: string) => {
+export const getFacilityAction = async (id?: string) => {
   await serverCheckPermission([PERMISSIONS.FACILITY_READ]);
 
   if (!id) return undefined;

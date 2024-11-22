@@ -1,7 +1,13 @@
 import { publicProcedure, router } from "@/server/trpc/router";
 import { z } from "zod";
 import { createOrUpdateFacilitySchema } from "@/server/facility/validations/facility.validation";
-import { createFacilityAction } from "@/server/facility/actions/facility.action";
+import {
+  createFacilityAction,
+  deleteFacilityAction,
+  getFacilitiesAction,
+  getFacilityAction,
+  updateFacilityAction,
+} from "@/server/facility/actions/facility.action";
 
 export const facilityRouter = router({
   getFacilities: publicProcedure.query(async () => {
