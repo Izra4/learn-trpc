@@ -7,6 +7,7 @@ import { MainLayout as Layout } from "admiral";
 import { TBreadcrumbsItem } from "admiral/breadcrumb";
 import {
   BuildOutlined,
+  CoffeeOutlined,
   DashboardOutlined,
   HolderOutlined,
   PieChartFilled,
@@ -58,6 +59,12 @@ const NavbarMenu = [
     label: <Link href="/facilities">Facilities</Link>,
     icon: <BuildOutlined />,
     permissions: [PERMISSIONS.FACILITY_READ],
+  },
+  {
+    key: "/studios",
+    label: <Link href="/studios">Studios</Link>,
+    icon: <CoffeeOutlined />,
+    permissions: [PERMISSIONS.STUDIO_READ],
   },
 ];
 
