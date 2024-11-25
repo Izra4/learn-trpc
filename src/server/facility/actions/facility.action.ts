@@ -1,3 +1,5 @@
+"use server";
+
 import {
   createOrUpdateFacilitySchema,
   TCreateOrUpdateFacilityValidation,
@@ -7,13 +9,15 @@ import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { validate } from "@/utils/zod-validate";
 import {
   createNewFacility,
-  findAllFacility,
+  deleteFacilityById,
+  facilityPagination,
   findFacilityById,
   updateFacilityById,
 } from "@/server/facility/repositories/facility.repository";
 import { Facility } from "@prisma/client";
 import NotFoundException from "../../../errors/NotFoundException";
 import BadRequestException from "../../../errors/BadRequestException";
+import { TIndexFacilityQueryParam } from "@/server/facility/validations/index-facility.validation";
 
 export const createFacilityAction = async (data: TCreateOrUpdateFacilityValidation) => {
   await serverCheckPermission([PERMISSIONS.FACILITY_CREATE]);
@@ -25,8 +29,10 @@ export const createFacilityAction = async (data: TCreateOrUpdateFacilityValidati
   } as Facility);
 };
 
-export const getFacilitiesAction = async () => {
-  return await findAllFacility();
+export const getFacilitiesAction = async (param: TIndexFacilityQueryParam) => {
+  await serverCheckPermission([PERMISSIONS.FACILITY_READ]);
+
+  return await facilityPagination(param);
 };
 
 export const getFacilityAction = async (id?: string) => {
@@ -62,5 +68,5 @@ export const deleteFacilityAction = async (id: string) => {
 
   if (id === "") throw new BadRequestException("id is undefined");
 
-  await findFacilityById(id);
+  await deleteFacilityById(id);
 };
