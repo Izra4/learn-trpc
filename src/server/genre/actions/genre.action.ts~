@@ -1,3 +1,5 @@
+"use server";
+
 import {
   createNewGenre,
   deleteGenreById,
@@ -14,6 +16,7 @@ import {
 } from "@/server/genre/validation/genre.validation";
 import { validate } from "@/utils/zod-validate";
 import { Genre } from "@prisma/client";
+import { userPagination } from "@/server/user/repositories/user.repository";
 
 export const createGenreAction = async (data: TCreateOrUpdateGenreValidation) => {
   await serverCheckPermission([PERMISSIONS.GENRE_CREATE]);
@@ -26,12 +29,15 @@ export const createGenreAction = async (data: TCreateOrUpdateGenreValidation) =>
 };
 
 export const getGenresAction = async () => {
-  return await findAllGenre();
+  await serverCheckPermission([PERMISSIONS.GENRE_READ]);
+
+  return await userPagination();
 };
 
-export const getGenreAction = async (from: string) => {
+export const getGenreAction = async (from?: string) => {
   await serverCheckPermission([PERMISSIONS.GENRE_DETAIL]);
 
+  if (!from) return undefined;
   const genre = await findGenreById(from);
 
   if (!genre) {
