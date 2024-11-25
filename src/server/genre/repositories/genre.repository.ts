@@ -1,6 +1,9 @@
 import prisma from "@/libs/prisma/prisma";
 import { Genre, User } from "@prisma/client";
 import { promise } from "zod";
+import { TIndexGenreQueryParam } from "@/server/genre/validation/index-genre.validation";
+import { TPaginationResponse } from "@/types/meta";
+import { convertPaginationMeta } from "@/utils/datatable";
 
 export const createNewGenre = async (data: Genre): Promise<void> => {
   await prisma.genre.create({
@@ -35,4 +38,40 @@ export const deleteGenreById = async (id: string): Promise<void> => {
       id,
     },
   });
+};
+
+export const genrePagination = async (
+  param: TIndexGenreQueryParam,
+): Promise<TPaginationResponse<Genre[]>> => {
+  const [data, meta] = await prisma.genre
+    .paginate({
+      where: {
+        deletedAt: null,
+        ...(param.search
+          ? {
+              name: {
+                contains: param.search,
+              },
+            }
+          : {}),
+      },
+      orderBy: {
+        ...(param.sort && param.order
+          ? {
+              [param.sort]: param.order,
+            }
+          : {
+              createdAt: "asc",
+            }),
+      },
+    })
+    .withPages({
+      limit: param.perPage,
+      page: param.page,
+    });
+
+  return {
+    data,
+    meta: convertPaginationMeta(meta, param),
+  };
 };
