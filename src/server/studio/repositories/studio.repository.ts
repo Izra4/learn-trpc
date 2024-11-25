@@ -5,7 +5,7 @@ import { TPaginationResponse } from "@/types/meta";
 import { StudioWithFacility } from "@/libs/prisma/types/studio-with-facility";
 import { convertPaginationMeta } from "@/utils/datatable";
 
-export const createNewStudio = async (name: string, capacity: number, facilitiesId: string[]) => {
+export const createNewStudio = async (name: string, capacity: number, facilitiesId?: string[]) => {
   return await prisma.$transaction(async (tx) => {
     const studio = await tx.studio.create({
       data: {

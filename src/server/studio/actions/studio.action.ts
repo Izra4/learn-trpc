@@ -9,6 +9,7 @@ import { serverCheckPermission } from "@/utils/permission";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { validate } from "@/utils/zod-validate";
 import {
+  createNewStudio,
   deleteStudioById,
   studioPagination,
   updateStudioById,
@@ -57,4 +58,10 @@ export const deleteStudioAction = async (id?: string) => {
   await deleteStudioById(id);
 };
 
-export const createStudioAction = async (input: TCreateOrUpdateStudioValidation) => {};
+export const createStudioAction = async (input: TCreateOrUpdateStudioValidation) => {
+  await serverCheckPermission([PERMISSIONS.STUDIO_CREATE]);
+
+  await validate(createOrUpdateStudioSchema, input);
+
+  await createNewStudio(input.name, input.capacity, input.facilityAdded);
+};

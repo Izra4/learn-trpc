@@ -107,7 +107,7 @@ export const updateStudioById = async (
     if (removedFacilityIds && removedFacilityIds.length > 0) {
       await tx.facilityStudio.deleteMany({
         where: {
-          id,
+          studioId: id,
           facilityId: { in: removedFacilityIds },
         },
       });
