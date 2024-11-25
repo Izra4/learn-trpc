@@ -1,8 +1,10 @@
+"use server";
+
 import {
   createNewGenre,
   deleteGenreById,
-  findAllGenre,
   findGenreById,
+  genrePagination,
   updateGenreById,
 } from "@/server/genre/repositories/genre.repository";
 import { serverCheckPermission } from "@/utils/permission";
@@ -14,6 +16,8 @@ import {
 } from "@/server/genre/validation/genre.validation";
 import { validate } from "@/utils/zod-validate";
 import { Genre } from "@prisma/client";
+import { userPagination } from "@/server/user/repositories/user.repository";
+import { TIndexGenreQueryParam } from "@/server/genre/validation/index-genre.validation";
 
 export const createGenreAction = async (data: TCreateOrUpdateGenreValidation) => {
   await serverCheckPermission([PERMISSIONS.GENRE_CREATE]);
@@ -25,8 +29,10 @@ export const createGenreAction = async (data: TCreateOrUpdateGenreValidation) =>
   } as Genre);
 };
 
-export const getGenresAction = async () => {
-  return await findAllGenre();
+export const getGenresAction = async (param: TIndexGenreQueryParam) => {
+  await serverCheckPermission([PERMISSIONS.GENRE_READ]);
+
+  return await genrePagination(param);
 };
 
 export const getGenreAction = async (from?: string) => {

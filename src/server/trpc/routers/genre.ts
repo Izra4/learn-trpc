@@ -8,10 +8,11 @@ import {
 } from "@/server/genre/actions/genre.action";
 import { z } from "zod";
 import { createGenreSchema } from "@/server/genre/validation/genre.validation";
+import { TIndexGenreQueryParam } from "@/server/genre/validation/index-genre.validation";
 export const genreRouter = router({
-  getGenres: publicProcedure.query(async () => {
-    return await getGenresAction();
-  }),
+  getGenres: publicProcedure
+    .input(z.custom<TIndexGenreQueryParam>())
+    .query(({ input }) => getGenresAction(input)),
 
   getGenre: publicProcedure
     .input(z.string().optional())
