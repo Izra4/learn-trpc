@@ -8,11 +8,12 @@ import {
   getFacilityAction,
   updateFacilityAction,
 } from "@/server/facility/actions/facility.action";
+import { TIndexFacilityQueryParam } from "@/server/facility/validations/index-facility.validation";
 
 export const facilityRouter = router({
-  getFacilities: publicProcedure.query(async () => {
-    return await getFacilitiesAction();
-  }),
+  getFacilities: publicProcedure
+    .input(z.custom<TIndexFacilityQueryParam>())
+    .query(({ input }) => getFacilitiesAction(input)),
 
   getFacility: publicProcedure
     .input(z.string().optional())
