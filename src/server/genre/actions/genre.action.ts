@@ -3,8 +3,8 @@
 import {
   createNewGenre,
   deleteGenreById,
-  findAllGenre,
   findGenreById,
+  genrePagination,
   updateGenreById,
 } from "@/server/genre/repositories/genre.repository";
 import { serverCheckPermission } from "@/utils/permission";
@@ -32,7 +32,7 @@ export const createGenreAction = async (data: TCreateOrUpdateGenreValidation) =>
 export const getGenresAction = async (param: TIndexGenreQueryParam) => {
   await serverCheckPermission([PERMISSIONS.GENRE_READ]);
 
-  return await userPagination(param);
+  return await genrePagination(param);
 };
 
 export const getGenreAction = async (from?: string) => {
