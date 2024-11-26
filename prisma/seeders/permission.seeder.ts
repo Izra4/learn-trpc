@@ -98,6 +98,21 @@ export async function permissionSeeder() {
     {
       name: PERMISSIONS.STUDIO_READ,
     },
+    {
+      name: PERMISSIONS.SCHEDULE_CREATE,
+    },
+    {
+      name: PERMISSIONS.SCHEDULE_UPDATE,
+    },
+    {
+      name: PERMISSIONS.SCHEDULE_DELETE,
+    },
+    {
+      name: PERMISSIONS.SCHEDULE_DETAIL,
+    },
+    {
+      name: PERMISSIONS.SCHEDULE_READ,
+    },
   ];
 
   await prisma.permission.createMany({

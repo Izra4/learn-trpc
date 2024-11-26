@@ -41,6 +41,11 @@ export async function rolePermissionSeeder() {
         PERMISSIONS.FACILITY_DELETE,
         PERMISSIONS.FACILITY_DETAIL,
         PERMISSIONS.FACILITY_READ,
+        PERMISSIONS.SCHEDULE_CREATE,
+        PERMISSIONS.SCHEDULE_UPDATE,
+        PERMISSIONS.SCHEDULE_DELETE,
+        PERMISSIONS.SCHEDULE_DETAIL,
+        PERMISSIONS.SCHEDULE_READ,
       ],
     },
     {
@@ -59,6 +64,8 @@ export async function rolePermissionSeeder() {
         PERMISSIONS.GENRE_DETAIL,
         PERMISSIONS.FACILITY_READ,
         PERMISSIONS.FACILITY_DETAIL,
+        PERMISSIONS.SCHEDULE_READ,
+        PERMISSIONS.SCHEDULE_DETAIL,
       ],
     },
   ];
