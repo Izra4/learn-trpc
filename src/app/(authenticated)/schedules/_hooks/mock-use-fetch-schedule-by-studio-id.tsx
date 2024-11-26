@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { TPaginationResponse } from "@/types/meta";
-import { MOCK_GENRES } from "../_dummies/genre-mock-data";
-import { Genre } from "@prisma/client";
+import { FilmSchedule } from "@prisma/client";
+import { MOCK_SCHEDULE } from "../_dummies/shcedule-mock-data";
 
-export const useFetchGenres = (
+export const useFetchScheduleByStudioId = (
+  studioId: string,
   filters: Record<string, any>,
   pagination: { page: number; per_page: number },
 ) => {
-  const [data, setData] = useState<TPaginationResponse<Genre[]> | null>(null);
+  const [data, setData] = useState<TPaginationResponse<FilmSchedule[]> | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchGenres = async () => {
+  const fetchSchedules = async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const filteredData = MOCK_GENRES.data.filter((item) =>
-          item.name.toLowerCase().includes((filters.search || "").toLowerCase()),
-        );
+        const filteredData = MOCK_SCHEDULE.data
+          .filter((item) => item.studioId === studioId)
+          .filter((item) =>
+            item.showTime.toLowerCase().includes((filters.search || "").toLowerCase()),
+          );
 
         const paginatedData = {
           data: filteredData.slice(
@@ -39,10 +42,10 @@ export const useFetchGenres = (
     const loadData = async () => {
       setIsLoading(true);
       try {
-        const result = await fetchGenres();
-        setData(result as TPaginationResponse<Genre[]>);
+        const result = await fetchSchedules();
+        setData(result as TPaginationResponse<FilmSchedule[]>);
       } catch (error) {
-        console.error("Error fetching genres:", error);
+        console.error("Error fetching schedule:", error);
       } finally {
         setIsLoading(false);
       }

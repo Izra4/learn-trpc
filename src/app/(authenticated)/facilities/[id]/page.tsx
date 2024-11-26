@@ -1,57 +1,37 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Page, Section } from "admiral";
 import { Descriptions } from "antd";
 import { useParams } from "next/navigation";
-import { Facility } from "@prisma/client";
-import { MOCK_FACILITIES } from "../_dummies/facility-mock-data";
+import { trpc } from "@/libs/trpc";
+import { formatDate } from "@/utils/formating-date";
 
 const DetailFacilityPage = () => {
   const params = useParams();
   const facilityId = typeof params.id === "string" ? params.id : "";
-  const [isLoading, setIsLoading] = useState(true);
-  const [facility, setFacility] = useState({} as Facility);
-
-  useEffect(() => {
-    // Simulasi loading dan fetching data
-    const fetchFacility = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulasi delay
-        const foundFacility = MOCK_FACILITIES.data.find((item) => item.id === facilityId);
-        setFacility(foundFacility as Facility);
-      } catch (error) {
-        console.error("Error fetching facility:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFacility();
-  }, [facilityId]);
+  const facilityQuery = trpc.facility.getFacility.useQuery(facilityId);
 
   const breadcrumbs = [
     { label: "Dashboard", path: "/dashboard" },
     { label: "Facility", path: "/facilities" },
-    { label: facility ? facility.name : "", path: `/facilities/${facilityId}` },
+    { label: facilityQuery.data?.name ?? "", path: `/facilities/${facilityQuery.data?.id}` },
   ];
 
   return (
     <Page title="Detail Facility" breadcrumbs={breadcrumbs}>
-      <Section loading={isLoading} title="Detail Facility">
+      <Section loading={facilityQuery.isLoading} title="Detail Facility">
         <Descriptions bordered column={2}>
           <Descriptions.Item span={2} label="Facility Id">
-            {facility ? facility?.id : ""}
+            {facilityQuery.data?.id}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Facility Name">
-            {facility.name}
+            {facilityQuery.data?.name}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Created At">
-            {new Date(facility.createdAt).toLocaleString()}
+            {formatDate(facilityQuery.data?.createdAt)}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Updated At">
-            {new Date(facility.updatedAt).toLocaleString()}
+            {formatDate(facilityQuery.data?.updatedAt)}
           </Descriptions.Item>
         </Descriptions>
       </Section>

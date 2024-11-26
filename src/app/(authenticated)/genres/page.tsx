@@ -3,31 +3,49 @@ import { Guard } from "@/app/_components/guard";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
-import { Button, Flex } from "antd";
+import { Button, Flex, message, Spin } from "antd";
 import Link from "next/link";
 import { ColumnsType } from "antd/es/table";
-import { TPaginationResponse } from "@/types/meta";
 import { useFilter } from "@/hooks/datatable/use-filter";
-import { useFetchGenres } from "./_hooks/mock-use-fetch-genre";
-import { useDeleteGenre } from "./_hooks/mock-use-delete-genre";
-import { useEffect, useState } from "react";
 import { DataTable, Page } from "admiral";
-import { makeSource } from "@/utils/datatable";
+import { makePagination, makeSource } from "@/utils/datatable";
 import { Genre } from "@prisma/client";
+import { trpc } from "@/libs/trpc";
+import { deleteGenreAction } from "@/server/genre/actions/genre.action";
+import { useEffect, useState } from "react";
+import { TPaginationResponse } from "@/types/meta";
+import { formatDate } from "@/utils/formating-date";
 
 const GenresPage = () => {
   const { filters, pagination, handleChange } = useFilter();
+  const [localData, setLocalData] = useState<TPaginationResponse<Genre[]>>();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Mock Fetch genres hook
-  const { data, isLoading } = useFetchGenres(filters, pagination);
-  const [localData, setLocalData] = useState<TPaginationResponse<Genre[]> | null>(data);
+  const { data, isLoading } = trpc.genre.getGenres.useQuery({
+    ...makePagination(pagination),
+    search: filters.search,
+  });
 
   useEffect(() => {
-    setLocalData(data); // Sync local data when fetched data changes
+    if (data) setLocalData(data as TPaginationResponse<Genre[]>);
   }, [data]);
 
-  // Mock Delete genre hook
-  const { handleDelete, isDeleting } = useDeleteGenre(setLocalData);
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      setLocalData((prev) => ({
+        ...prev!,
+        data: prev?.data.filter((genre) => genre.id !== id) ?? [],
+      }));
+
+      await deleteGenreAction(id);
+      message.success("Genre deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete genre");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const columns: ColumnsType<Genre> = [
     {
@@ -40,7 +58,7 @@ const GenresPage = () => {
       title: "Created At",
       key: "createdAt",
       render: (_, record) => {
-        return new Date(record.createdAt).toLocaleString();
+        return formatDate(record.createdAt);
       },
     },
     {
@@ -48,6 +66,7 @@ const GenresPage = () => {
       title: "Action",
       key: "Action",
       render: (_, record) => {
+        const isDeleting = deletingId === record.id;
         return (
           <Flex>
             <Guard permissions={[PERMISSIONS.GENRE_READ]}>
@@ -59,9 +78,12 @@ const GenresPage = () => {
             </Guard>
             <Guard permissions={[PERMISSIONS.GENRE_DELETE]}>
               <Button
-                icon={<DeleteOutlined style={{ color: "red" }} />}
+                icon={
+                  isDeleting ? <Spin size="small" /> : <DeleteOutlined style={{ color: "red" }} />
+                }
                 type="link"
-                onClick={() => handleDelete(record?.id)}
+                onClick={() => handleDelete(record.id)}
+                disabled={isDeleting}
               />
             </Guard>
             <Guard permissions={[PERMISSIONS.GENRE_DETAIL]}>
@@ -90,9 +112,9 @@ const GenresPage = () => {
         onChange={handleChange}
         rowKey="id"
         showRowSelection={false}
-        source={makeSource(localData as TPaginationResponse<Genre[]>)}
+        source={makeSource(localData)} // Gunakan localData
         columns={columns}
-        loading={isLoading || isDeleting}
+        loading={isLoading}
         search={filters.search}
       />
     </Page>
