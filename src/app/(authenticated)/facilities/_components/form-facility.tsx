@@ -23,7 +23,7 @@ export const FormFacility: FC<Props> = ({ formProps, error, loading }) => {
       <Form.Item
         label="Facility Name"
         name="name"
-        rules={[{ required: true, message: "Facility wajib diisi" }]}
+        rules={[{ required: true, message: "Facility name is required" }]}
       >
         <Input placeholder="Facility Name" />
       </Form.Item>
