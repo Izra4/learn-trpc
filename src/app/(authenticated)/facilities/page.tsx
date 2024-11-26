@@ -3,31 +3,49 @@ import { Guard } from "@/app/_components/guard";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
-import { Button, Flex } from "antd";
+import { Button, Flex, message } from "antd";
 import Link from "next/link";
 import { ColumnsType } from "antd/es/table";
 import { TPaginationResponse } from "@/types/meta";
 import { useFilter } from "@/hooks/datatable/use-filter";
 import { useEffect, useState } from "react";
 import { DataTable, Page } from "admiral";
-import { makeSource } from "@/utils/datatable";
+import { makePagination, makeSource } from "@/utils/datatable";
 import { Facility } from "@prisma/client";
-import { useFetchFacilities } from "./_hooks/mock-use-fetch-facilities";
-import { useDeleteFacility } from "./_hooks/mock-use-delete-facilities";
+import { trpc } from "@/libs/trpc";
+import { deleteFacilityAction } from "@/server/facility/actions/facility.action";
+import { formatDate } from "@/utils/formating-date";
 
 const FasilityPage = () => {
   const { filters, pagination, handleChange } = useFilter();
+  const [localData, setLocalData] = useState<TPaginationResponse<Facility[]>>();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Mock Fetch facilities hook
-  const { data, isLoading } = useFetchFacilities(filters, pagination);
-  const [localData, setLocalData] = useState<TPaginationResponse<Facility[]> | null>(data);
+  const { data, isLoading } = trpc.facility.getFacilities.useQuery({
+    ...makePagination(pagination),
+    search: filters.search,
+  });
 
   useEffect(() => {
-    setLocalData(data); // Sync local data when fetched data changes
+    if (data) setLocalData(data as TPaginationResponse<Facility[]>);
   }, [data]);
 
-  // Mock Delete facility hook
-  const { handleDelete, isDeleting } = useDeleteFacility(setLocalData);
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      setLocalData((prev) => ({
+        ...prev!,
+        data: prev?.data.filter((genre) => genre.id !== id) ?? [],
+      }));
+
+      await deleteFacilityAction(id);
+      message.success("Facility deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete facility");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const columns: ColumnsType<Facility> = [
     {
@@ -40,7 +58,7 @@ const FasilityPage = () => {
       title: "Created At",
       key: "createdAt",
       render: (_, record) => {
-        return new Date(record.createdAt).toLocaleString();
+        return formatDate(record.createdAt);
       },
     },
     {
@@ -48,6 +66,7 @@ const FasilityPage = () => {
       title: "Action",
       key: "Action",
       render: (_, record) => {
+        const isDeleting = deletingId === record.id;
         return (
           <Flex>
             <Guard permissions={[PERMISSIONS.FACILITY_READ]}>
@@ -62,6 +81,7 @@ const FasilityPage = () => {
                 icon={<DeleteOutlined style={{ color: "red" }} />}
                 type="link"
                 onClick={() => handleDelete(record?.id)}
+                disabled={isDeleting}
               />
             </Guard>
             <Guard permissions={[PERMISSIONS.FACILITY_UPDATE]}>
@@ -96,7 +116,7 @@ const FasilityPage = () => {
         showRowSelection={false}
         source={makeSource(localData as TPaginationResponse<Facility[]>)}
         columns={columns}
-        loading={isLoading || isDeleting}
+        loading={isLoading}
         search={filters.search}
       />
     </Page>
