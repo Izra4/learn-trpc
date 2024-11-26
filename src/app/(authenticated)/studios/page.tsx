@@ -3,31 +3,49 @@ import { Guard } from "@/app/_components/guard";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusCircleOutlined } from "@ant-design/icons";
 
-import { Button, Flex } from "antd";
+import { Button, Flex, message } from "antd";
 import Link from "next/link";
 import { ColumnsType } from "antd/es/table";
 import { TPaginationResponse } from "@/types/meta";
 import { useFilter } from "@/hooks/datatable/use-filter";
 import { useEffect, useState } from "react";
 import { DataTable, Page } from "admiral";
-import { makeSource } from "@/utils/datatable";
-import { useFetchStudios } from "./_hooks/mock-use-fetch-studios";
+import { makePagination, makeSource } from "@/utils/datatable";
 import { Studio } from "@prisma/client";
-import { useDeleteStudio } from "./_hooks/mock-use-delete-studios";
+import { trpc } from "@/libs/trpc";
+import { deleteStudioAction } from "@/server/studio/actions/studio.action";
+import { formatDate } from "@/utils/formating-date";
 
-const FasilityPage = () => {
+const StudioPage = () => {
   const { filters, pagination, handleChange } = useFilter();
+  const [localData, setLocalData] = useState<TPaginationResponse<Studio[]>>();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Mock Fetch studio hook
-  const { data, isLoading } = useFetchStudios(filters, pagination);
-  const [localData, setLocalData] = useState<TPaginationResponse<Studio[]> | null>(data);
+  const { data, isLoading } = trpc.studio.getStudios.useQuery({
+    ...makePagination(pagination),
+    search: filters.search,
+  });
 
   useEffect(() => {
-    setLocalData(data); // Sync local data when fetched data changes
+    if (data) setLocalData(data as TPaginationResponse<Studio[]>);
   }, [data]);
 
-  // Mock Delete studio hook
-  const { handleDelete, isDeleting } = useDeleteStudio(setLocalData);
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      setLocalData((prev) => ({
+        ...prev!,
+        data: prev?.data.filter((genre) => genre.id !== id) ?? [],
+      }));
+
+      await deleteStudioAction(id);
+      message.success("Studio deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete studio");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const columns: ColumnsType<Studio> = [
     {
@@ -40,7 +58,7 @@ const FasilityPage = () => {
       title: "Created At",
       key: "createdAt",
       render: (_, record) => {
-        return new Date(record.createdAt).toLocaleString();
+        return formatDate(record.createdAt);
       },
     },
     {
@@ -48,6 +66,7 @@ const FasilityPage = () => {
       title: "Action",
       key: "Action",
       render: (_, record) => {
+        const isDeleting = deletingId === record.id;
         return (
           <Flex>
             <Guard permissions={[PERMISSIONS.STUDIO_READ]}>
@@ -62,6 +81,7 @@ const FasilityPage = () => {
                 icon={<DeleteOutlined style={{ color: "red" }} />}
                 type="link"
                 onClick={() => handleDelete(record?.id)}
+                disabled={isDeleting}
               />
             </Guard>
             <Guard permissions={[PERMISSIONS.STUDIO_UPDATE]}>
@@ -92,14 +112,14 @@ const FasilityPage = () => {
         showRowSelection={false}
         source={makeSource(localData as TPaginationResponse<Studio[]>)}
         columns={columns}
-        loading={isLoading || isDeleting}
+        loading={isLoading}
         search={filters.search}
       />
     </Page>
   );
 };
 
-export default FasilityPage;
+export default StudioPage;
 
 const TopAction = () => (
   <Guard permissions={[PERMISSIONS.STUDIO_CREATE]}>

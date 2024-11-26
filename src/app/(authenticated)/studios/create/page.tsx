@@ -3,11 +3,14 @@
 import { Col, message, Row } from "antd";
 import { Page } from "admiral";
 import { FormStudio } from "../_components/form-studio";
-import { TStudioCreateOrUpdateValidation } from "../_validation/studio-create-or-update.validation";
 import { useRouter } from "next/navigation";
+import { trpc } from "@/libs/trpc";
+import { TCreateOrUpdateStudioValidation } from "@/server/studio/validations/studio.validation";
+import { transformTRPCError } from "@/utils/error";
 
 const CreateStudioPage = () => {
   const router = useRouter();
+
   const breadcrumbs = [
     {
       label: "Dashboard",
@@ -17,31 +20,25 @@ const CreateStudioPage = () => {
       label: "Studios",
       path: "/studios",
     },
+    {
+      label: "Create Studio",
+      path: "/studios/create",
+    },
   ];
 
-  // Mock function to simulate API call
-  const createStudio = async (data: TStudioCreateOrUpdateValidation) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (Math.random() > 0.2) {
-          resolve({ success: true, data: data });
-        } else {
-          reject(new Error("Simulated error: Unable to create studio."));
-        }
-      }, 1000); // Simulate a delay
-    });
-  };
-
-  const handleOnFinish = async (data: TStudioCreateOrUpdateValidation) => {
-    try {
-      const response = await createStudio(data);
+  const createStudioMutation = trpc.studio.createStudio.useMutation({
+    onSuccess: () => {
+      router.refresh();
       message.success("Studio created successfully!");
-      console.log("Response:", response);
       router.push("/studios");
-    } catch (error: any) {
-      message.error(error.message || "An error occurred");
-    }
-  };
+    },
+    onError: (error) => {
+      !error.data?.zodError && message.error(error.message);
+    },
+  });
+
+  const handleOnFinish = (data: TCreateOrUpdateStudioValidation) =>
+    createStudioMutation.mutate(data);
 
   return (
     <Page title="Add Studio" breadcrumbs={breadcrumbs}>
@@ -49,8 +46,8 @@ const CreateStudioPage = () => {
         <Col span={12} style={{ margin: "auto" }}>
           <FormStudio
             formProps={{ onFinish: handleOnFinish }}
-            error={null} // Since there's no backend, no error state to pass
-            loading={false} // Replace with actual loading state if needed
+            error={transformTRPCError(createStudioMutation.error)}
+            loading={createStudioMutation.isLoading}
           />
         </Col>
       </Row>
