@@ -7,12 +7,14 @@ import { MainLayout as Layout } from "admiral";
 import { TBreadcrumbsItem } from "admiral/breadcrumb";
 import {
   BuildOutlined,
+  CalendarOutlined,
   CoffeeOutlined,
   DashboardOutlined,
   HolderOutlined,
   PieChartFilled,
   TagOutlined,
   UserOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { Session } from "next-auth";
@@ -65,6 +67,18 @@ const NavbarMenu = [
     label: <Link href="/studios">Studios</Link>,
     icon: <CoffeeOutlined />,
     permissions: [PERMISSIONS.STUDIO_READ],
+  },
+  {
+    key: "/films",
+    label: <Link href="/films">Films</Link>,
+    icon: <VideoCameraOutlined />,
+    permissions: [PERMISSIONS.FILM_READ],
+  },
+  {
+    key: "/schedules",
+    label: <Link href="/schedules">Schedules</Link>,
+    icon: <CalendarOutlined />,
+    permissions: [PERMISSIONS.SCHEDULE_READ],
   },
 ];
 
