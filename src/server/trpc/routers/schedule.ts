@@ -7,7 +7,7 @@ import {
   getScheduleByIdAction,
   getSchedulesAction,
   updateScheduleByIdAction,
-} from "@/server/schedule/Actions/schedule.action";
+} from "@/server/schedule/actions/schedule.action";
 import { createOrUpdateScheduleSchema } from "@/server/schedule/validations/schedule.validation";
 import { createOrUpdateStudioSchema } from "@/server/studio/validations/studio.validation";
 
