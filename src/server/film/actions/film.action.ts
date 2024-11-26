@@ -1,3 +1,5 @@
+"use server";
+
 import { TIndexFilmQueryParam } from "@/server/film/validations/index-film.validation";
 import {
   createOrUpdateFilmSchema,
