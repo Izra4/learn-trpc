@@ -23,7 +23,7 @@ export const FormGenre: FC<Props> = ({ formProps, error, loading }) => {
       <Form.Item
         label="Genre Name"
         name="name"
-        rules={[{ required: true, message: "Genre wajib diisi" }]}
+        rules={[{ required: true, message: "Genre name is required" }]}
       >
         <Input placeholder="Genre Name" />
       </Form.Item>

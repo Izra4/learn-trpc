@@ -2,37 +2,32 @@
 
 import { Page } from "admiral";
 import { Col, message, Row } from "antd";
-import { TCreateOrUpdateUserValidation } from "@/server/user/validations/create-or-update.validation";
 import { FormGenre } from "../_components/form-genre";
+import { trpc } from "@/libs/trpc";
+import { useRouter } from "next/navigation";
+import { TCreateOrUpdateGenreValidation } from "@/server/genre/validation/genre.validation";
+import { transformTRPCError } from "@/utils/error";
 
 const CreateGenrePage = () => {
+  const router = useRouter();
+
   const breadcrumb = [
     { label: "Dashboard", path: "/dashboard" },
     { label: "Genres", path: "/genres" },
   ];
 
-  // Mock function to simulate API call
-  const createGenre = async (data: TCreateOrUpdateUserValidation) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (Math.random() > 0.2) {
-          resolve({ success: true, data: data });
-        } else {
-          reject(new Error("Simulated error: Unable to create user."));
-        }
-      }, 1000); // Simulate a delay
-    });
-  };
-
-  const handleOnFinish = async (data: TCreateOrUpdateUserValidation) => {
-    try {
-      const response = await createGenre(data);
+  const createGenreMutation = trpc.genre.createGenre.useMutation({
+    onSuccess: () => {
+      router.refresh();
       message.success("Genre created successfully!");
-      console.log("Response:", response);
-    } catch (error: any) {
-      message.error(error.message || "An error occurred");
-    }
-  };
+      router.push("/genres");
+    },
+    onError: (error) => {
+      !error.data?.zodError && message.error(error.message);
+    },
+  });
+
+  const handleOnFinish = (data: TCreateOrUpdateGenreValidation) => createGenreMutation.mutate(data);
 
   return (
     <Page title="Add Genre" breadcrumbs={breadcrumb}>
@@ -40,8 +35,8 @@ const CreateGenrePage = () => {
         <Col span={12} style={{ margin: "auto" }}>
           <FormGenre
             formProps={{ onFinish: handleOnFinish }}
-            error={null} // Since there's no backend, no error state to pass
-            loading={false} // Replace with actual loading state if needed
+            error={transformTRPCError(createGenreMutation.error)}
+            loading={createGenreMutation.isLoading}
           />
         </Col>
       </Row>
