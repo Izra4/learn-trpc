@@ -1,11 +1,10 @@
 "use client";
-import { Button, Form, Input, Select } from "antd";
-import { FC, useEffect } from "react";
+import { Button, Form, Input, InputNumber, Select } from "antd";
+import { FC, useEffect, useState } from "react";
 import { FormProps } from "antd/lib";
 import { CustomException } from "@/types/cutom-exception";
 import { useFormErrorHandling } from "@/hooks/form/use-form-error-handling";
-import { MOCK_FACILITIES } from "../../facilities/_dummies/facility-mock-data";
-import { Facility } from "@prisma/client";
+import { trpc } from "@/libs/trpc";
 
 type Props = {
   formProps: FormProps;
@@ -15,74 +14,91 @@ type Props = {
 
 export const FormStudio: FC<Props> = ({ formProps, loading, error }) => {
   const [form] = Form.useForm();
+  const [facilitiesOptions, setFacilitiesOptions] = useState<{ value: string; label: string }[]>(
+    [],
+  );
+  const [facilityAdded, setFacilityAdded] = useState<string[]>([]);
+  const [facilityRemoved, setFacilityRemoved] = useState<string[]>([]);
 
   useFormErrorHandling(form, error);
 
-  const facilityOptions = MOCK_FACILITIES.data.map((facility) => ({
-    value: facility.id,
-    label: facility.name,
-  }));
+  const { data } = trpc.facility.getFacilities.useQuery({ page: 1, perPage: 100 });
 
-  // Mock to default form values
+  useEffect(() => {
+    if (data) {
+      const facilityOptions = data.data.map((facility) => ({
+        value: facility.id,
+        label: facility.name,
+      }));
+      setFacilitiesOptions(facilityOptions);
+    }
+  }, [data]);
+
   useEffect(() => {
     if (formProps.initialValues) {
       const defaultFacilities =
-        formProps.initialValues.facilities?.map((facility: Facility) => ({
-          name: facility.name,
-          id: facility.id,
-        })) || [];
+        formProps.initialValues.facilities?.map((facility: any) => facility.facilityId) || [];
 
       form.setFieldsValue({
         ...formProps.initialValues,
-        name: formProps.initialValues.studioName,
-        facilities: defaultFacilities.map((f: Facility) => f.name),
-        facilityIds: defaultFacilities.map((f: Facility) => f.id),
+        name: formProps.initialValues.name,
+        facilityIds: defaultFacilities,
       });
     }
   }, [formProps.initialValues, form]);
 
-  // Mock to handle facility change
   const handleFacilityChange = (selectedValues: string[]) => {
-    form.setFieldValue("facilityIds", selectedValues);
+    const initialFacilities =
+      formProps.initialValues?.facilities?.map((facility: any) => facility.facilityId) || [];
+    const removedFacilities = initialFacilities.filter(
+      (id: string) => !selectedValues.includes(id),
+    );
+    const addedFacilities = selectedValues.filter((id) => !initialFacilities.includes(id));
+
+    setFacilityAdded(addedFacilities);
+    setFacilityRemoved(removedFacilities);
+  };
+
+  const handleOnFinish = async (values: any) => {
+    const formData = {
+      name: values.name,
+      capacity: values.capacity,
+      facilityAdded: facilityAdded,
+      facilityRemoved: facilityRemoved,
+    };
+
+    formProps.onFinish?.(formData);
   };
 
   return (
-    <Form
-      {...formProps}
-      form={form}
-      layout="vertical"
-      onFinish={(values) => {
-        const formData = {
-          name: values.name,
-          facilityIds: form.getFieldValue("facilityIds"),
-        };
-        formProps.onFinish?.(formData);
-      }}
-    >
+    <Form {...formProps} form={form} layout="vertical" onFinish={handleOnFinish}>
       <Form.Item
         label="Name"
         name="name"
-        rules={[{ required: true, message: "Nama studio wajib diisi" }]}
+        rules={[{ required: true, message: "Studio name is required" }]}
       >
         <Input placeholder="Studio Name" />
       </Form.Item>
 
       <Form.Item
+        label="Capacity"
+        name="capacity"
+        rules={[{ required: true, message: "Capacity is required" }]}
+      >
+        <InputNumber placeholder="Capacity" style={{ width: "100%" }} />
+      </Form.Item>
+
+      <Form.Item
         label="Facility"
         name="facilityIds"
-        rules={[{ required: true, message: "Minimal satu facilitas harus dipilih" }]}
+        rules={[{ required: true, message: "Min 1 facility must be selected" }]}
       >
         <Select
           mode="multiple"
           placeholder="Select facility"
-          options={facilityOptions}
+          options={facilitiesOptions}
           onChange={handleFacilityChange}
         />
-      </Form.Item>
-
-      {/* Hidden form item to store facilityIds if needed */}
-      <Form.Item name="facilities" hidden>
-        <Input />
       </Form.Item>
 
       <Form.Item>
