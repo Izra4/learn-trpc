@@ -3,91 +3,48 @@
 import { Page } from "admiral";
 import { Col, message, Row } from "antd";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { MOCK_GENRES } from "../../_dummies/genre-mock-data";
 import { FormGenre } from "../../_components/form-genre";
-import { Genre } from "@prisma/client";
+import { trpc } from "@/libs/trpc";
+import { TCreateOrUpdateGenreValidation } from "@/server/genre/validation/genre.validation";
 
 const UpdateUserPage = () => {
-  const params = useParams();
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [genre, setGenre] = useState({} as Genre);
-
+  const params = useParams();
   const genreId = typeof params.id === "string" ? params.id : "";
 
-  useEffect(() => {
-    // Simulate fetching data
-    const fetchGenre = async () => {
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        const foundGenre = MOCK_GENRES.data.find((g) => g.id === genreId);
-        console.log(foundGenre);
-        setGenre(foundGenre as Genre);
-      } catch (error) {
-        message.error("Failed to fetch genre data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchGenre();
-  }, [genreId]);
-
-  // Mock function to simulate API call for updating genre
-  const updateGenre = async (data: Genre) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (Math.random() > 0.2) {
-          resolve({
-            success: true,
-            data: {
-              id: genreId,
-              name: data.name,
-            },
-          });
-        } else {
-          reject(new Error("Simulated error: Unable to update genre."));
-        }
-      }, 1000);
-    });
-  };
-
-  const handleOnFinish = async (data: Genre) => {
-    setIsSubmitting(true);
-    try {
-      const response = await updateGenre(data);
+  const genreQuery = trpc.genre.getGenre.useQuery(genreId);
+  const updateGenreMutation = trpc.genre.updateGenre.useMutation({
+    onSuccess: () => {
       message.success("Genre updated successfully!");
-      console.log("Response:", response);
       router.push("/genres");
-    } catch (error: any) {
-      message.error(error.message || "An error occurred");
-    } finally {
-      setIsSubmitting(false);
-    }
+    },
+    onError: (error) => {
+      !error.data?.zodError && message.error(error.message);
+    },
+  });
+
+  const handleOnFinish = (data: TCreateOrUpdateGenreValidation) => {
+    updateGenreMutation.mutate({ value: data, id: genreId });
   };
+
+  const breadcrumbs = [
+    { label: "Dashboard", path: "/dashboard" },
+    { label: "Genre", path: "/genres" },
+    { label: "Update Genre", path: `/genres/${genreId}/update` },
+  ];
 
   return (
-    <Page
-      title="Update Genre"
-      breadcrumbs={[
-        { label: "Dashboard", path: "/dashboard" },
-        { label: "Users", path: "/Users" },
-      ]}
-    >
+    <Page title="Update Genre" breadcrumbs={breadcrumbs}>
       <Row>
         <Col span={12} style={{ margin: "auto" }}>
           <FormGenre
             formProps={{
               onFinish: handleOnFinish,
-              initialValues: genre,
-              disabled: isLoading,
+              initialValues: genreQuery.data,
+              disabled: genreQuery.isLoading,
             }}
             error={null}
-            loading={isSubmitting}
+            loading={genreQuery.isLoading}
           />
         </Col>
       </Row>
