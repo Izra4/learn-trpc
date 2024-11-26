@@ -39,8 +39,13 @@ prisma.$use(async (params, next) => {
   if (params.action === "deleteMany") {
     // Delete many queries
     // Change action to an update
-    params.action = "updateMany";
-    params.args.data = { deletedAt: new Date() };
+    const model = await prisma.$queryRaw`DESCRIBE ${params.model}`;
+    const hasDeletedAt = model.some((col) => col.Field === "deletedAt");
+
+    if (hasDeletedAt) {
+      params.action = "updateMany";
+      params.args.data = { deletedAt: new Date() };
+    }
   }
 
   return next(params);
