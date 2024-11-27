@@ -9,7 +9,6 @@ import {
 import { z } from "zod";
 import { TIndexFilmQueryParam } from "@/server/film/validations/index-film.validation";
 import { createOrUpdateFilmSchema } from "@/server/film/validations/film.validation";
-import { createStudioAction } from "@/server/studio/actions/studio.action";
 
 export const filmRouter = router({
   getFilms: publicProcedure
@@ -18,7 +17,7 @@ export const filmRouter = router({
 
   getFilm: publicProcedure.input(z.string()).query(({ input }) => getFilmAction(input)),
 
-  updateStudio: publicProcedure
+  updateFilm: publicProcedure
     .input(
       z.object({
         data: createOrUpdateFilmSchema,
@@ -27,9 +26,9 @@ export const filmRouter = router({
     )
     .mutation(({ input }) => updateFilmAction(input)),
 
-  delteStudio: publicProcedure.input(z.string()).mutation(({ input }) => deleteFilmAction(input)),
+  deleteFilm: publicProcedure.input(z.string()).mutation(({ input }) => deleteFilmAction(input)),
 
-  createStudio: publicProcedure
+  createFilm: publicProcedure
     .input(createOrUpdateFilmSchema)
     .mutation(({ input }) => createFilmAction(input)),
 });
