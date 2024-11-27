@@ -12,7 +12,7 @@ dependencies:
     specifier: ^1.0.0
     version: 1.0.2(@ant-design/cssinjs@1.22.0)(antd@5.16.4)(next@14.2.18)(react-dom@18.3.1)(react@18.3.1)
   '@prisma/client':
-    specifier: ^5.19.1
+    specifier: ^5.22.0
     version: 5.22.0(prisma@5.22.0)
   '@sentry/nextjs':
     specifier: ^8.20.0
@@ -92,6 +92,9 @@ dependencies:
   zod:
     specifier: ^3.23.8
     version: 3.23.8
+  zod-form-data:
+    specifier: ^2.0.2
+    version: 2.0.2(zod@3.23.8)
 
 devDependencies:
   '@chromatic-com/storybook':
@@ -185,7 +188,7 @@ devDependencies:
     specifier: ^3.3.2
     version: 3.3.3
   prisma:
-    specifier: ^5.19.1
+    specifier: ^5.22.0
     version: 5.22.0
   storybook:
     specifier: ^8.1.11
@@ -12480,6 +12483,14 @@ packages:
     resolution: {integrity: sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==}
     engines: {node: '>=12.20'}
     dev: true
+
+  /zod-form-data@2.0.2(zod@3.23.8):
+    resolution: {integrity: sha512-sKTi+k0fvkxdakD0V5rq+9WVJA3cuTQUfEmNqvHrTzPLvjfLmkkBLfR0ed3qOi9MScJXTHIDH/jUNnEJ3CBX4g==}
+    peerDependencies:
+      zod: '>= 3.11.0'
+    dependencies:
+      zod: 3.23.8
+    dev: false
 
   /zod-to-json-schema@3.23.5(zod@3.23.8):
     resolution: {integrity: sha512-5wlSS0bXfF/BrL4jPAbz9da5hDlDptdEppYfe+x4eIJ7jioqKG9uUxOwPzqof09u/XeVdrgFu29lZi+8XNDJtA==}

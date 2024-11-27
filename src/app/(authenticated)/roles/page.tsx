@@ -1,6 +1,6 @@
 "use client";
 import { makePagination, makeSource } from "@/utils/datatable";
-import { Role } from "@prisma/client";
+import { Role } from "@prisma/client/index";
 import { DataTable, Page } from "admiral";
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { Button, Flex, message } from "antd";
@@ -48,7 +48,7 @@ const RolesPage = () => {
                 message.success("Role berhasil dihapus");
               }}
             />
-            <Button href={`/roles/form?id=${record?.id}`} type="link" icon={<EditOutlined />} />
+            <Button href={`/roles/${record?.id}/update`} type="link" icon={<EditOutlined />} />
           </Flex>
         );
       },

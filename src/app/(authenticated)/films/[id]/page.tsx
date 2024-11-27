@@ -1,66 +1,50 @@
 "use client";
 
-import { Film } from "@prisma/client";
-import { useState, useEffect } from "react";
 import { Page, Section } from "admiral";
 import { Descriptions, Image } from "antd";
 import { useParams } from "next/navigation";
-import { MOCK_FILMS } from "../_dummies/mock-film-data";
+import { trpc } from "@/libs/trpc";
+import { formatDate } from "@/utils/formating-date";
 
 const DetailFilmPage = () => {
   const params = useParams();
   const filmId = typeof params.id === "string" ? params.id : "";
-  const [isLoading, setIsLoading] = useState(true);
-  const [film, setFilm] = useState<Film>({} as Film);
-
-  useEffect(() => {
-    // Simulasi loading dan fetching data
-    const fetchFilm = async () => {
-      setIsLoading(true);
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulasi delay
-        const foundFilm = MOCK_FILMS.data.find((item) => item.id === filmId);
-        setFilm(foundFilm as Film);
-      } catch (error) {
-        console.error("Error fetching film:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchFilm();
-  }, [filmId]);
+  const filmQuery = trpc.film.getFilm.useQuery(filmId);
 
   const breadcrumbs = [
     { label: "Dashboard", path: "/dashboard" },
     { label: "Film", path: "/films" },
-    { label: film ? film.title : "", path: `/films/${filmId}` },
+    { label: filmQuery.data?.title ?? "", path: `/films/${filmId}` },
   ];
 
   return (
     <Page title="Detail Film" breadcrumbs={breadcrumbs}>
-      <Section loading={isLoading} title="Detail Film">
+      <Section loading={filmQuery.isLoading} title="Detail Film">
         <Descriptions bordered column={2}>
           <Descriptions.Item span={2} label="Film Id">
-            {film ? film?.id : ""}
+            {filmQuery ? filmQuery?.data?.id : ""}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Film Title">
-            {film.title}
+            {filmQuery.data?.title}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Film Duration">
-            {film.duration} min
+            {filmQuery.data?.duration} min
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Film Description">
-            {film.description}
+            {filmQuery.data?.description}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Film Poster">
-            <Image src={film.poster}></Image>
+            <Image
+              style={{ maxWidth: "200px" }}
+              src={`${process.env.NEXT_PUBLIC_APP_URL}/${filmQuery.data?.poster}`}
+              alt="Film poster"
+            />
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Created At">
-            {new Date(film.createdAt).toLocaleString()}
+            {formatDate(filmQuery.data?.createdAt)}
           </Descriptions.Item>
           <Descriptions.Item span={2} label="Updated At">
-            {new Date(film.updatedAt).toLocaleString()}
+            {formatDate(filmQuery.data?.updatedAt)}
           </Descriptions.Item>
         </Descriptions>
       </Section>

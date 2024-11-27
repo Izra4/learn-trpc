@@ -1,3 +1,5 @@
+"use server";
+
 import path from "path";
 import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
@@ -5,6 +7,8 @@ import fs from "fs";
 const UPLOAD_DIR = path.resolve("public/uploads");
 
 export const POST = async (req: NextRequest) => {
+  console.log("req", req);
+
   const formData = await req.formData();
   const body = Object.fromEntries(formData);
   const file = (body.file as Blob) || null;
@@ -24,6 +28,6 @@ export const POST = async (req: NextRequest) => {
 
   return NextResponse.json({
     success: true,
-    name: (body.file as File).name,
+    path: `uploads/${(body.file as File).name}`,
   });
 };
