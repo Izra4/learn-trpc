@@ -24,6 +24,6 @@ export const POST = async (req: NextRequest) => {
 
   return NextResponse.json({
     success: true,
-    name: (body.file as File).name,
+    name: "public/uploads" + (body.file as File).name,
   });
 };
