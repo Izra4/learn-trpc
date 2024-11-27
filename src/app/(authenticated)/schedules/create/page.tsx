@@ -5,10 +5,12 @@ import { Page } from "admiral";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FormSchedule } from "../_components/form-schedule";
+import { trpc } from "@/libs/trpc";
+import { TCreateOrUpdateScheduleSchema } from "@/server/schedule/validations/schedule.validation";
+import { transformTRPCError } from "@/utils/error";
 
 const CreateSchedulePage = () => {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
 
   const breadcrumbs = [
     {
@@ -25,38 +27,30 @@ const CreateSchedulePage = () => {
     },
   ];
 
-  // Mock function to simulate API call
-  const createSchedule = async (data: any) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (Math.random() > 0.2) {
-          resolve({ success: true, data: data });
-        } else {
-          reject(new Error("Simulated error: Unable to create schedule."));
-        }
-      }, 1000); // Simulate a delay
-    });
-  };
-
-  const handleOnFinish = async (data: any) => {
-    try {
-      setIsLoading(true);
-      const response = await createSchedule(data);
+  const createScheduleMutation = trpc.schedule.createSchedule.useMutation({
+    onSuccess: () => {
+      router.refresh();
       message.success("Schedule created successfully!");
-      console.log("Response:", response);
       router.push("/schedules");
-    } catch (error: any) {
-      message.error(error.message || "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onError: (error) => {
+      !error.data?.zodError && message.error(error.message);
+    },
+  });
+
+  const handleOnFinish = (data: TCreateOrUpdateScheduleSchema) => {
+    createScheduleMutation.mutate(data);
   };
 
   return (
     <Page title="Add Schedule" breadcrumbs={breadcrumbs}>
       <Row>
         <Col span={12} style={{ margin: "auto" }}>
-          <FormSchedule formProps={{ onFinish: handleOnFinish }} error={null} loading={isLoading} />
+          <FormSchedule
+            formProps={{ onFinish: handleOnFinish }}
+            error={transformTRPCError(createScheduleMutation.error)}
+            loading={createScheduleMutation.isLoading}
+          />
         </Col>
       </Row>
     </Page>

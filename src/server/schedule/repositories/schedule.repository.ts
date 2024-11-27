@@ -25,6 +25,9 @@ export const getAllFilmSchedules = async (
 ): Promise<TPaginationResponse<FilmSchedule[]>> => {
   const [data, meta] = await prisma.filmSchedule
     .paginate({
+      where: {
+        deletedAt: null,
+      },
       include: {
         film: true,
         studio: true,
@@ -41,7 +44,7 @@ export const getAllFilmSchedules = async (
   };
 };
 
-export const getFilmScheduleById = async (id: string): Promise<FilmSchedule | null> => {
+export const getFilmScheduleById = async (id: string) => {
   return await prisma.filmSchedule.findUnique({
     where: { id },
     include: {
