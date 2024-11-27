@@ -40,15 +40,8 @@ export const createFilmAction = async (data: TCreateOrUpdateFilmValidation) => {
   await serverCheckPermission([PERMISSIONS.FILM_CREATE]);
 
   await validate(createOrUpdateFilmSchema, data);
-  const uploadedFilePath = await uploadFileToServer(data.poster);
 
-  await createNewFilm(
-    data.title,
-    data.duration,
-    data.description,
-    uploadedFilePath,
-    data.genreAdded,
-  );
+  await createNewFilm(data.title, data.duration, data.description, data.poster, data.genreAdded);
 };
 
 export const updateFilmAction = async (input: {
