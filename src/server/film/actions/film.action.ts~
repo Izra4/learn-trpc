@@ -11,8 +11,7 @@ import {
   createNewFilm,
   deleteFilmById,
   filmPagination,
-  findFilmByIdWithGenres,
-  updateFilmById,
+  findFilmByIdWithGenres, updateFilmById,
 } from "@/server/film/repositories/film.repository";
 import NotFoundException from "../../../errors/NotFoundException";
 import { validate } from "@/utils/zod-validate";
@@ -51,10 +50,7 @@ export const createFilmAction = async (data: TCreateOrUpdateFilmValidation) => {
   );
 };
 
-export const updateFilmAction = async (input: {
-  id: string;
-  data: TCreateOrUpdateFilmValidation;
-}) => {
+export const updateFilmAction = async (input: { id: string; data: TCreateOrUpdateFilmValidation }) => {
   const { id, data } = input;
 
   await serverCheckPermission([PERMISSIONS.FILM_UPDATE]);
@@ -77,15 +73,7 @@ export const updateFilmAction = async (input: {
 
   const uploadedFilePath = await uploadFileToServer(data.poster);
 
-  await updateFilmById(
-    id,
-    data.title,
-    data.duration,
-    data.description,
-    uploadedFilePath,
-    data.genreAdded,
-    data.genreRemoved,
-  );
+  await updateFilmById(id, data.title, data.duration, data.description, uploadedFilePath, data.genreAdded, data.genreRemoved);
 };
 
 export const deleteFilmAction = async (id: string) => {
