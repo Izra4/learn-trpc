@@ -11,6 +11,7 @@ import { validate } from "@/utils/zod-validate";
 import {
   createNewStudio,
   deleteStudioById,
+  findStudioByIdWithFacilities,
   studioPagination,
   updateStudioById,
 } from "@/server/studio/repositories/studio.repository";
@@ -29,7 +30,7 @@ export const getStudioAction = async (id?: string): Promise<Studio | undefined> 
 
   if (!id) return undefined;
 
-  const studio = await getStudioAction(id);
+  const studio = await findStudioByIdWithFacilities(id);
   if (!studio) throw new NotFoundException("Studio tidak ditemukan");
 
   return studio;

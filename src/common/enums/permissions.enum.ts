@@ -36,4 +36,10 @@ export enum PERMISSIONS {
   FACILITY_DELETE = "Delete Facility",
   FACILITY_DETAIL = "Detail Facility",
   FACILITY_READ = "Read Facility",
+
+  SCHEDULE_CREATE = "Create Schedule",
+  SCHEDULE_UPDATE = "Update Schedule",
+  SCHEDULE_DELETE = "Delete Schedule",
+  SCHEDULE_DETAIL = "Detail Schedule",
+  SCHEDULE_READ = "Read Schedule",
 }

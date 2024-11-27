@@ -66,14 +66,18 @@ export const studioPagination = async (
   };
 };
 
-export const findStudioById = async (id: string) => {
+export const findStudioByIdWithFacilities = async (id: string) => {
   return (
     (await prisma.studio.findUnique({
       where: {
         id,
       },
       include: {
-        facilities: true,
+        facilities: {
+          include: {
+            facility: true,
+          },
+        },
       },
     })) ?? undefined
   );
@@ -117,5 +121,12 @@ export const updateStudioById = async (
 };
 
 export const deleteStudioById = async (id?: string): Promise<void> => {
-  await prisma.studio.delete({ where: { id } });
+  await prisma.film.update({
+    where: {
+      id,
+    },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
 };
