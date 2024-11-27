@@ -1,33 +1,50 @@
 "use client";
 
 import { useFilter } from "@/hooks/datatable/use-filter";
-import { useFetchFilms } from "./_hooks/mock-use-fetch-films";
 import { TPaginationResponse } from "@/types/meta";
 import { Film } from "@prisma/client";
 import { useEffect, useState } from "react";
-import { useDeleteFilm } from "./_hooks/mock-use-delete-films";
 import { ColumnsType } from "antd/es/table";
-import { Button, Flex } from "antd";
+import { Button, Flex, message } from "antd";
 import { PERMISSIONS } from "@/common/enums/permissions.enum";
 import { Guard } from "@/app/_components/guard";
 import { DeleteOutlined, EditOutlined, EyeOutlined, PlusCircleOutlined } from "@ant-design/icons";
 import { DataTable, Page } from "admiral";
 import Link from "next/link";
-import { makeSource } from "@/utils/datatable";
+import { makePagination, makeSource } from "@/utils/datatable";
+import { trpc } from "@/libs/trpc";
+import { deleteFilmAction } from "@/server/film/actions/film.action";
 
 const FilmsPage = () => {
   const { filters, pagination, handleChange } = useFilter();
+  const [localData, setLocalData] = useState<TPaginationResponse<Film[]>>();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  // Mock Fetch films hook
-  const { data, isLoading } = useFetchFilms(filters, pagination);
-  const [localData, setLocalData] = useState<TPaginationResponse<Film[]> | null>(data);
+  const { data, isLoading } = trpc.film.getFilms.useQuery({
+    ...makePagination(pagination),
+    search: filters.search,
+  });
 
   useEffect(() => {
-    setLocalData(data); // Sync local data when fetched data changes
+    if (data) setLocalData(data as TPaginationResponse<Film[]>);
   }, [data]);
 
-  // Mock delete films hook
-  const { handleDelete, isDeleting } = useDeleteFilm(setLocalData);
+  const handleDelete = async (id: string) => {
+    try {
+      setDeletingId(id);
+      setLocalData((prev) => ({
+        ...prev!,
+        data: prev?.data.filter((genre) => genre.id !== id) ?? [],
+      }));
+
+      await deleteFilmAction(id);
+      message.success("Film deleted successfully");
+    } catch (error) {
+      message.error("Failed to delete film");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const columns: ColumnsType<Film> = [
     {
@@ -48,6 +65,7 @@ const FilmsPage = () => {
       title: "Action",
       key: "Action",
       render: (_, record) => {
+        const isDeleting = deletingId === record.id;
         return (
           <Flex>
             <Guard permissions={[PERMISSIONS.FILM_READ]}>
@@ -62,6 +80,7 @@ const FilmsPage = () => {
                 icon={<DeleteOutlined style={{ color: "red" }} />}
                 type="link"
                 onClick={() => handleDelete(record?.id)}
+                disabled={isDeleting}
               />
             </Guard>
             <Guard permissions={[PERMISSIONS.FILM_UPDATE]}>
@@ -92,7 +111,7 @@ const FilmsPage = () => {
         showRowSelection={false}
         source={makeSource(localData as TPaginationResponse<Film[]>)}
         columns={columns}
-        loading={isLoading || isDeleting}
+        loading={isLoading}
         search={filters.search}
       />
     </Page>

@@ -39,6 +39,7 @@ const UpdateRolePage = () => {
       <Row>
         <Col span={12} style={{ margin: "auto" }}>
           <FormRole
+            isUpdate={true}
             formProps={{ initialValues: data, onFinish: handleOnFinish }}
             error={updateRoleMutation.error}
             loading={updateRoleMutation.isLoading}

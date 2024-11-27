@@ -16,7 +16,6 @@ import {
 } from "@/server/film/repositories/film.repository";
 import NotFoundException from "../../../errors/NotFoundException";
 import { validate } from "@/utils/zod-validate";
-import { uploadFileToServer } from "@/utils/upload-file";
 import * as fs from "node:fs";
 import path from "path";
 
@@ -40,15 +39,8 @@ export const createFilmAction = async (data: TCreateOrUpdateFilmValidation) => {
   await serverCheckPermission([PERMISSIONS.FILM_CREATE]);
 
   await validate(createOrUpdateFilmSchema, data);
-  const uploadedFilePath = await uploadFileToServer(data.poster);
 
-  await createNewFilm(
-    data.title,
-    data.duration,
-    data.description,
-    uploadedFilePath,
-    data.genreAdded,
-  );
+  await createNewFilm(data.title, data.duration, data.description, data.poster, data.genreAdded);
 };
 
 export const updateFilmAction = async (input: {
@@ -64,25 +56,25 @@ export const updateFilmAction = async (input: {
     throw new NotFoundException("Film tidak ditemukan");
   }
 
-  const oldFilePath = film.poster;
+  const newPosterPath = data.poster;
+  const oldPosterPath = film.poster;
 
-  if (oldFilePath) {
-    const uploadDir = path.resolve(__dirname, "../../..", "uploads");
-    const absoluteOldFilePath = path.join(uploadDir, path.basename(oldFilePath));
-
-    if (fs.existsSync(absoluteOldFilePath)) {
-      fs.unlinkSync(absoluteOldFilePath);
+  if (newPosterPath) {
+    if (oldPosterPath) {
+      const uploadDir = path.resolve(__dirname, "../../..", "uploads");
+      const absoluteFilePath = path.join(uploadDir, path.basename(oldPosterPath));
+      if (fs.existsSync(absoluteFilePath)) {
+        fs.unlinkSync(absoluteFilePath);
+      }
     }
   }
 
-  const uploadedFilePath = await uploadFileToServer(data.poster);
-
-  await updateFilmById(
+  return await updateFilmById(
     id,
     data.title,
     data.duration,
     data.description,
-    uploadedFilePath,
+    newPosterPath || oldPosterPath,
     data.genreAdded,
     data.genreRemoved,
   );
