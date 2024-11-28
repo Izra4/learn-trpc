@@ -80,10 +80,5 @@ export const updateScheduleByIdAction = async (input: {
     throw new Error("Jadwal untuk film ini sudah ada pada studio dan waktu yang sama");
   }
 
-  const existingSchedule = await getFilmScheduleById(id);
-  if (!existingSchedule) {
-    throw new NotFoundException("Jadwal tidak ditemukan");
-  }
-
   return await updateFilmSchedule(id, value.filmId, value.studioId, showTime, value.price);
 };

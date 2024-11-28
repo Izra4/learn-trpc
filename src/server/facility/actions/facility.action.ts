@@ -66,7 +66,5 @@ export const updateFacilityAction = async ({
 export const deleteFacilityAction = async (id: string) => {
   await serverCheckPermission([PERMISSIONS.FACILITY_DELETE]);
 
-  if (id === "") throw new BadRequestException("id is undefined");
-
   await deleteFacilityById(id);
 };

@@ -18,8 +18,8 @@ export const createOrUpdateFilmSchema = z.object({
   poster: z
     .string({ required_error: "Poster Wajib Diisi", message: "Poster harus berupa string" })
     .min(1, { message: "Poster wajib diisi" }),
-  genreAdded: z.array(z.string()).optional(),
-  genreRemoved: z.array(z.string()).optional(),
+  genreAdded: z.array(z.string().min(1)).optional(),
+  genreRemoved: z.array(z.string().min(1)).optional(),
 });
 
 export type TCreateOrUpdateFilmValidation = z.infer<typeof createOrUpdateFilmSchema>;
