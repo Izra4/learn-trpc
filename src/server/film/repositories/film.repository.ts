@@ -3,6 +3,7 @@ import { FilmWithGenre } from "@/libs/prisma/types/film-with-genre";
 import { TPaginationResponse } from "@/types/meta";
 import prisma from "@/libs/prisma/prisma";
 import { convertPaginationMeta } from "@/utils/datatable";
+import { PrismaClient } from "@prisma/client/extension";
 
 export const filmPagination = async (
   param: TIndexFilmQueryParam,
@@ -115,16 +116,18 @@ export const updateFilmById = async (
   genresAdded?: string[],
   genresRemoved?: string[],
 ) => {
+  const rawPrisma = new PrismaClient();
+
   return await prisma.$transaction(async (tx) => {
     const updatedFilm = await tx.film.update({
       where: {
         id,
       },
       data: {
-        title,
-        duration,
-        description,
-        poster,
+        ...(title && { title }),
+        ...(duration && { duration }),
+        ...(description && { description }),
+        ...(poster && { poster }),
       },
     });
 
@@ -138,7 +141,7 @@ export const updateFilmById = async (
     }
 
     if (genresRemoved && genresRemoved.length > 0) {
-      await tx.filmGenre.deleteMany({
+      await rawPrisma.filmGenre.deleteMany({
         where: {
           filmId: id,
           genreId: {

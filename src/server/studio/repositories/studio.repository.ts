@@ -4,6 +4,7 @@ import { TIndexStudioQueryParam } from "@/server/studio/validations/index-studio
 import { TPaginationResponse } from "@/types/meta";
 import { StudioWithFacility } from "@/libs/prisma/types/studio-with-facility";
 import { convertPaginationMeta } from "@/utils/datatable";
+import { PrismaClient } from "@prisma/client/extension";
 
 export const createNewStudio = async (name: string, capacity: number, facilitiesId?: string[]) => {
   return await prisma.$transaction(async (tx) => {
@@ -99,11 +100,13 @@ export const updateStudioById = async (
   removedFacilityIds?: string[],
 ) => {
   return await prisma.$transaction(async (tx) => {
+    const rawPrisma = new PrismaClient();
+
     const updatedStudio = await tx.studio.update({
       where: { id },
       data: {
-        name,
-        capacity,
+        ...(name && { name }),
+        ...(capacity && { capacity }),
       },
     });
 
@@ -117,7 +120,7 @@ export const updateStudioById = async (
     }
 
     if (removedFacilityIds && removedFacilityIds.length > 0) {
-      await tx.facilityStudio.deleteMany({
+      await rawPrisma.facilityStudio.deleteMany({
         where: {
           studioId: id,
           facilityId: { in: removedFacilityIds },
