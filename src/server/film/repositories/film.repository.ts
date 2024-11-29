@@ -5,9 +5,24 @@ import prisma from "@/libs/prisma/prisma";
 import { convertPaginationMeta } from "@/utils/datatable";
 import { PrismaClient } from "@prisma/client/extension";
 
+type durationCategory = "short" | "medium" | "extra_long" | "long" | "default";
+
+const durationMapping: Record<durationCategory, { duration?: { gte?: number; lte?: number } }> = {
+  default: {},
+  short: { duration: { lte: 10 } },
+  medium: { duration: { gte: 10, lte: 30 } },
+  long: { duration: { gte: 30, lte: 60 } },
+  extra_long: { duration: { gte: 60 } },
+};
+
 export const filmPagination = async (
   param: TIndexFilmQueryParam,
 ): Promise<TPaginationResponse<FilmWithGenre[]>> => {
+  const durationFilter =
+    param.duration && durationMapping[param.duration as durationCategory]
+      ? durationMapping[param.duration as durationCategory].duration
+      : durationMapping["default"].duration;
+
   const [data, meta] = await prisma.film
     .paginate({
       include: {
@@ -38,6 +53,7 @@ export const filmPagination = async (
               },
             }
           : {}),
+        ...(durationFilter ? { duration: durationFilter } : {}),
       },
       orderBy: {
         ...(param.sort && param.order

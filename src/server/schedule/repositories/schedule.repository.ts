@@ -20,9 +20,24 @@ export const createFilmSchedule = async (
   });
 };
 
+type PriceCategory = "small" | "medium" | "large" | "extra_large" | "default";
+
+const priceMapping: Record<PriceCategory, { price?: { gte?: number; lte?: number } }> = {
+  small: { price: { lte: 100 } },
+  medium: { price: { gte: 100, lte: 200 } },
+  large: { price: { gte: 200, lte: 500 } },
+  extra_large: { price: { gte: 500 } },
+  default: {},
+};
+
 export const getAllFilmSchedules = async (
   param: TIndexScheduleQueryParam,
 ): Promise<TPaginationResponse<FilmSchedule[]>> => {
+  const priceFilter =
+    param.price && priceMapping[param.price as PriceCategory]
+      ? priceMapping[param.price as PriceCategory].price
+      : priceMapping["default"].price;
+
   const [data, meta] = await prisma.filmSchedule
     .paginate({
       where: {
@@ -42,6 +57,7 @@ export const getAllFilmSchedules = async (
               },
             }
           : {}),
+        ...(param.price ? { price: priceFilter } : {}),
       },
       include: {
         film: true,
