@@ -3,6 +3,7 @@ import { FilmSchedule } from "@prisma/client";
 import { TPaginationResponse } from "@/types/meta";
 import { convertPaginationMeta } from "@/utils/datatable";
 import { TIndexScheduleQueryParam } from "@/server/schedule/validations/index-schedule.vaildation";
+import { ScheduleWithStudioFilm } from "@/libs/prisma/types/schedule-with-film-studio";
 
 export const createFilmSchedule = async (
   filmId: string,
@@ -32,7 +33,7 @@ const priceMapping: Record<PriceCategory, { price?: { gte?: number; lte?: number
 
 export const getAllFilmSchedules = async (
   param: TIndexScheduleQueryParam,
-): Promise<TPaginationResponse<FilmSchedule[]>> => {
+): Promise<TPaginationResponse<ScheduleWithStudioFilm[]>> => {
   const priceFilter =
     param.price && priceMapping[param.price as PriceCategory]
       ? priceMapping[param.price as PriceCategory].price
