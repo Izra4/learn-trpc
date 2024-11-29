@@ -100,8 +100,6 @@ export const updateStudioById = async (
   removedFacilityIds?: string[],
 ) => {
   return await prisma.$transaction(async (tx) => {
-    const rawPrisma = new PrismaClient();
-
     const updatedStudio = await tx.studio.update({
       where: { id },
       data: {
@@ -120,7 +118,7 @@ export const updateStudioById = async (
     }
 
     if (removedFacilityIds && removedFacilityIds.length > 0) {
-      await rawPrisma.facilityStudio.deleteMany({
+      await tx.facilityStudio.deleteMany({
         where: {
           studioId: id,
           facilityId: { in: removedFacilityIds },

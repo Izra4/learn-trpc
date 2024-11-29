@@ -7,6 +7,7 @@
 import { pagination } from "prisma-extension-pagination";
 import { QueryEvent } from "./query-event";
 import { PrismaClient } from "@prisma/client";
+import { createSoftDeleteExtension } from "prisma-extension-soft-delete";
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
@@ -25,37 +26,41 @@ declare const globalThis: {
 
 const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
 
-// Soft delete middleware
-prisma.$use(async (params, next) => {
-  // Check incoming query type
-  if (params.model === "User")
-    if (params.action === "delete") {
-      // Delete queries
-      // Change action to an update
-      params.action = "update";
-      params.args.data = { deletedAt: new Date() };
-    }
-
-  if (params.action === "deleteMany") {
-    // Delete many queries
-    // Change action to an update
-    params.action = "updateMany";
-    params.args.data = { deletedAt: new Date() };
-  }
-
-  return next(params);
-});
-
-prisma.$on("query", (e: QueryEvent) => {
-  console.log("Query: " + e.query);
-  console.log("Params: " + e.params);
-  console.log("Duration: " + e.duration + "ms");
-});
-
-export default prisma.$extends(
+/**
+ * Prisma With Trashed (tanpa soft-delete)
+ *
+ * IMPORTANT: Saat ini belum ada fitur `withTrashed` di prisma-extension-soft-delete
+ * Jadi, gunakan `prismaWithTrashed` untuk INCLUDE data yang sudah dihapus
+ *
+ * Example:
+ * const { withTrashed } = queryParam;
+ * const [data, meta] = await (withTrashed ? prismaWithTrashed : prisma).user.paginate({...});
+ *
+ */
+export const prismaWithTrashed = prisma.$extends(
   pagination({
     pages: {
       includePageCount: true,
+    },
+  }),
+);
+
+/**
+ * Prisma client with Pagination and Soft Delete extension.
+ *
+ * IMPORTANT: Untuk include soft-deleted data, gunakan `prismaWithTrashed`
+ */
+export default prismaWithTrashed.$extends(
+  createSoftDeleteExtension({
+    models: {
+      User: true,
+    },
+    defaultConfig: {
+      field: "deletedAt",
+      createValue: (deleted: any) => {
+        if (deleted) return new Date();
+        return null;
+      },
     },
   }),
 );

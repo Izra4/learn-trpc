@@ -132,8 +132,6 @@ export const updateFilmById = async (
   genresAdded?: string[],
   genresRemoved?: string[],
 ) => {
-  const rawPrisma = new PrismaClient();
-
   return await prisma.$transaction(async (tx) => {
     const updatedFilm = await tx.film.update({
       where: {
@@ -157,7 +155,7 @@ export const updateFilmById = async (
     }
 
     if (genresRemoved && genresRemoved.length > 0) {
-      await rawPrisma.filmGenre.deleteMany({
+      await tx.filmGenre.deleteMany({
         where: {
           filmId: id,
           genreId: {
