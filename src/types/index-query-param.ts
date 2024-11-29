@@ -6,6 +6,7 @@ export const IndexQueryParamSchema = z.object({
   search: z.string().optional(),
   order: z.string().optional(),
   sort: z.string().optional(),
+  created_at: z.string().optional(),
 });
 
 export type TIndexQueryParam = z.infer<typeof IndexQueryParamSchema>;

@@ -27,6 +27,21 @@ export const getAllFilmSchedules = async (
     .paginate({
       where: {
         deletedAt: null,
+        ...(param.created_at
+          ? {
+              createdAt: {
+                ...(param.created_at[0] ? { gte: new Date(param.created_at[0]) } : {}),
+                ...(param.created_at[1] ? { lte: new Date(param.created_at[1]) } : {}),
+              },
+            }
+          : {}),
+        ...(param.search
+          ? {
+              name: {
+                contains: param.search,
+              },
+            }
+          : {}),
       },
       include: {
         film: true,

@@ -29,6 +29,14 @@ export const filmPagination = async (
               },
             }
           : {}),
+        ...(param.created_at
+          ? {
+              createdAt: {
+                ...(param.created_at[0] ? { gte: new Date(param.created_at[0]) } : {}),
+                ...(param.created_at[1] ? { lte: new Date(param.created_at[1]) } : {}),
+              },
+            }
+          : {}),
       },
       orderBy: {
         ...(param.sort && param.order

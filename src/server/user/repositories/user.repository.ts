@@ -23,6 +23,14 @@ export const userPagination = async (
               },
             }
           : {}),
+        ...(queryParam.created_at
+          ? {
+              createdAt: {
+                ...(queryParam.created_at[0] ? { gte: new Date(queryParam.created_at[0]) } : {}),
+                ...(queryParam.created_at[1] ? { lte: new Date(queryParam.created_at[1]) } : {}),
+              },
+            }
+          : {}),
       },
       orderBy: {
         ...(queryParam.sort && queryParam.order
